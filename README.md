@@ -43,8 +43,11 @@ $ firefox https://ipv6.srv-testy.gb1.brightbox.com
 
 - Mobile use is less than ideal due to lack of control keys. Probably
 needs some buttons.
-- Allowing terminal access to anything is risky. Make
-sure you know what you are doing.
+- Allowing terminal access to anything is risky. Make sure you know what
+you are doing.
+- The terminal is the classic 80x24ish fixed size. There is no fancy
+out-of-band protocol here to pass terminal change events to the
+server. See it as a chance to experience life as a 1980s terminal user.
 
 ## Contributing
 Issues and Pull Requests welcome if you can think of ways to improve
