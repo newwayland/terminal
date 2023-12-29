@@ -1,0 +1,89 @@
+<!doctype html>
+<!--
+Web Terminal
+Copyright (C) 2024 Neil Wilson
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <title>Web Terminal</title>
+        <script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.min.js" integrity="sha384-xjfWUeCWdMtvpAb/SmM6lMzS6pQGcQa0loOl1d97j6Odw0vjK9nW3+dTb/bn/mwH" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/xterm-addon-attach@0.9.0/lib/xterm-addon-attach.min.js" integrity="sha384-FZ3dFU++JVp3cNkR7tt4iI70N4+lfEuiEyk5ljzlUsArQd1JP3kazo5RWeCsuc6E" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/xterm-addon-webgl@0.16.0/lib/xterm-addon-webgl.min.js" integrity="sha384-LjE7pQ+MvZLxKNFYaNqxXiKIg0LASkwKbvcMtgxwNfSSDVjJ4tgEe0p56hzikjhs" crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.min.css" integrity="sha384-bCmR+SZjjvfBoQQFbh7fdQAkgeXZYHgvJsVq7CDc/2xoPGAstZkwLliBZMTPQCx6" crossorigin="anonymous">
+        <style>
+            body {
+                display: flex;
+                height: 100vh;
+                width: 100vw;
+                justify-content: center;
+                align-items: center;
+            }
+            #terminal {
+                padding: 10px 20px;
+                border-radius: 4px;
+                background-color: black;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="terminal"></div>
+        <script>
+            // Setup WebSocket connection URL
+            const queryString = window.location.search;
+            const urlParams = new URLSearchParams(queryString);
+            const targetHost = urlParams.get("host") || window.location.hostname || 'localhost';
+            const targetPath = urlParams.get("path") || '/ws';
+            
+            // Use a URL object so santisation and encoding of supplied path
+            // and any IPv6 addresses is handled properly
+            const socketUrl = new URL(targetPath, `wss://${targetHost}`)
+
+            // Create an xterm.js terminal
+            const term = new Terminal({
+                            fontFamily: '"Cascadia Code", Menlo, monospace',
+                            cursorBlink: true,
+                            macOptionIsMeta: true,
+                            cols: 82,
+                            rows: 24,
+                        });
+
+
+            // Load the WebGL addon if available
+            var isWebglEnabled = false;
+            try {
+                const webgl = new window.WebglAddon.WebglAddon();
+                term.loadAddon(webgl);
+                isWebglEnabled = true;
+            } catch (e) {
+                console.warn('WebGL addon threw an exception during load', e);
+            }
+
+            // Create a WebSocket
+            const socket = new WebSocket(socketUrl);
+
+            // Load the WebSocket attach addon
+            // This automatically wires up the socket to the terminal
+            // events in an optimal manner
+            const attachAddon = new window.AttachAddon.AttachAddon(socket);
+            term.loadAddon(attachAddon);
+
+            // Start the terminal
+            const terminalContainer = document.getElementById('terminal');
+            term.open(terminalContainer);
+        </script>
+    </body>
+</html>
